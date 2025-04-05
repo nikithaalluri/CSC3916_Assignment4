@@ -8,6 +8,7 @@ const cors = require('cors');
 const User = require('./Users');
 const Movie = require('./Movies'); // You're not using Movie, consider removing it
 const Review = require('./Reviews');
+const trackReviewGA4 = require('./analytics');
 const mongoose = require('mongoose');
 
 const app = express();
@@ -119,6 +120,12 @@ router.route('/reviews')
       });
 
       await review.save();
+
+      // 🔥 Add this block to trigger Google Analytics event
+      const movie = await Movie.findById(req.body.movieId);
+      if (movie) {
+        await trackReviewGA4(movie.title, movie.genre);
+      }
 
       return res.status(201).json({
         success: true,
